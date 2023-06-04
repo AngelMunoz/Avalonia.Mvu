@@ -1,3 +1,5 @@
+open System.Reactive.Subjects
+
 open Avalonia
 open Avalonia.Data
 open Avalonia.Controls
@@ -9,20 +11,21 @@ open App
 
 
 let panelContent (window: Window) =
-  let mutable count = 0
 
-  let button = Button().content("Click me!!")
-
-  let textbox = TextBox().text(window.BindTitle())
+  let counter = new BehaviorSubject<int> 0
 
   let counterText =
-    button.ObserveOnClick()
-    |> Observable.tap(fun _ -> count <- count + 1)
-    |> Observable.map(fun _ -> $"You clicked %i{count} times")
+    counter |> Observable.map(fun count -> $"You clicked %i{count} times")
 
-  let label = TextBlock().text(counterText, BindingMode.OneWay)
+  let incrementOnClick _ observable =
+    observable |> Observable.add(fun _ -> counter.OnNext(counter.Value + 1))
 
-  StackPanel().children(button, textbox, label)
+  StackPanel()
+    .children(
+      Button().content("Click me!!").OnClick(incrementOnClick),
+      TextBox().text(window.BindTitle()),
+      TextBlock().text(counterText, BindingMode.OneWay)
+    )
 
 let view () : Window =
   let window = Window().title("NXUI and F#").width(300).height(300)
