@@ -1,5 +1,3 @@
-open System.Reactive.Subjects
-
 open Avalonia
 open Avalonia.Data
 open Avalonia.Controls
@@ -7,18 +5,34 @@ open Avalonia.Controls
 open NXUI.Extensions
 open NXUI.FSharp.Extensions
 
-open App
+open Elmish
+open type Avalonia.Mvu.AvaloniaElmish
 
+type State = { count: int }
 
-let panelContent (window: Window) =
+type Message =
+  | Increment
+  | Decrement
+  | Reset
 
-  let counter = new BehaviorSubject<int> 0
+let panelContent (window: Window) : StackPanel =
+
+  let counter, dispatch =
+    useElmish(
+      { count = 0 },
+      fun msg state ->
+        match msg with
+        | Increment -> { state with count = state.count + 1 }, Cmd.none
+        | Decrement -> { state with count = state.count - 1 }, Cmd.none
+        | Reset -> { state with count = 0 }, Cmd.none
+    )
 
   let counterText =
-    counter |> Observable.map(fun count -> $"You clicked %i{count} times")
+    counter
+    |> Observable.map(fun ({ count = count }) -> $"You clicked %i{count} times")
 
   let incrementOnClick _ observable =
-    observable |> Observable.add(fun _ -> counter.OnNext(counter.Value + 1))
+    observable |> Observable.add(fun _ -> dispatch Increment)
 
   StackPanel()
     .children(
