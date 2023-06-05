@@ -1,30 +1,85 @@
 ﻿using Elmish;
 using static Avalonia.Mvu.AvaloniaElmish;
+using static Avalonia.Mvu.CSharp;
 
 StackPanel PanelContent(Window window)
 {
   var (counter, dispatch) =
     UseElmish<State, Message>(model: new State(Count: 0), update: (message, state) =>
     {
-      return message switch
+      switch (message)
       {
-        Message.Increment => (state with { Count = state.Count + 1 }, Cmd.none<Message>()),
-        Message.Decrement => (state with { Count = state.Count - 1 }, Cmd.none<Message>()),
-        _ => (state with { Count = 0 }, Cmd.none<Message>())
-      };
+        case Message.Increment:
+          return (state with { Count = state.Count + 1 }, Cmd.ofMsg<Message>(new Message.SetName("Increment")));
+
+        case Message.Decrement:
+          return (state with { Count = state.Count - 1 }, Cmd.ofMsg<Message>(new Message.SetName("Decrement")));
+
+        case Message.Reset:
+          return (state with { Count = 0 }, Cmd.ofMsg<Message>(new Message.SetName("Reset")));
+
+        case Message.NameFound(bool nameFound):
+          return (state with { NameFound = nameFound }, Cmd.none<Message>());
+
+        case Message.SetName(string name):
+          var wasNameFound = (string name) =>
+            name.Equals("peter", StringComparison.InvariantCultureIgnoreCase);
+
+          Func<bool, Message> onSuccess = (bool nameFound) => new Message.NameFound(nameFound);
+
+          var cmd = Cmdcs.OfFunc.perform(wasNameFound, name, onSuccess);
+
+          return (state with { Name = name }, cmd);
+
+        default:
+          return (state, Cmd.none<Message>());
+      }
     });
 
   var counterText =
-    counter.Select(state => $"You clicked {state.Count} times");
+    counter
+      .Select(state => state.Count)
+      .DistinctUntilChanged()
+      .Select(count => $"You clicked {count} times");
+
+  var nameFound =
+    counter
+    .Select(state => state.NameFound)
+    .DistinctUntilChanged();
+
+  var actionPerformed = counter
+    .Select(state => state.Name)
+    .DistinctUntilChanged()
+    .Select(name => $"Action Performed: {name}");
+
+  var incrementOnClick = (Button sender, IObservable<RoutedEventArgs> e) =>
+    {
+      e.Subscribe(_ => dispatch(new Message.Increment()));
+    };
+
+  var checkText = (TextBox sender, IObservable<string> e) =>
+    {
+      e
+      .Throttle(TimeSpan.FromMilliseconds(250))
+      .Subscribe(name => dispatch(new Message.SetName(name)));
+    };
 
   return StackPanel()
     .Children(
-      Button().Content("Click me!").OnClick((_, observable) =>
-      {
-        observable.Subscribe(_ => dispatch(new Message.Increment()));
-      }),
+      Button().Content("Click me!").OnClick(incrementOnClick),
       TextBox().Text(window.BindTitle()),
-      TextBlock().Text(counterText, BindingMode.OneWay)
+      TextBlock().Text(counterText, BindingMode.OneWay),
+      TextBlock().Text(actionPerformed, BindingMode.OneWay),
+      StackPanel()
+        .Spacing(4.0)
+        .Children(
+          Label().Content("Find the name!"),
+          TextBox().Watermark("Starts with P ends with R").OnText(checkText)
+        ),
+      CheckBox()
+        .IsChecked(nameFound.ToBinding(), BindingMode.OneWay)
+        .IsEnabled(false)
+        .Content("Name Found")
     );
 }
 
@@ -44,19 +99,17 @@ AppBuilder
   .StartWithClassicDesktopLifetime(View, args);
 
 
-public record State(int Count = 0);
+public record State(int Count = 0, string Name = "", bool NameFound = false);
 
-public abstract class Message
+public abstract record Message
 {
-  public sealed class Increment : Message
-  {
-  }
+  public sealed record Increment : Message;
 
-  public sealed class Decrement : Message
-  {
-  }
+  public sealed record Decrement : Message;
 
-  public sealed class Reset : Message
-  {
-  }
+  public sealed record Reset : Message;
+
+  public sealed record NameFound(bool Found) : Message;
+
+  public sealed record SetName(string Name) : Message;
 }
