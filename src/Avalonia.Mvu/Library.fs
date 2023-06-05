@@ -4,6 +4,75 @@ open System
 open Elmish
 open System.Reactive.Subjects
 
+module CSharp =
+
+  module Cmdcs =
+    let inline map (f: Func<'Value, 'Message>, cmd: Cmd<'Value>) =
+      Cmd.map (FuncConvert.FromFunc f) cmd
+
+    module OfFunc =
+      let either
+        (
+          fn: Func<'Arg, 'Return>,
+          arg: 'Arg,
+          ofSuccess: Func<'Return, 'Message>,
+          ofError: Func<exn, 'Message>
+        ) : Cmd<'Message> =
+        let fn = FuncConvert.FromFunc fn
+        let onSuccess = FuncConvert.FromFunc ofSuccess
+        let onError = FuncConvert.FromFunc ofError
+        Cmd.OfFunc.either fn arg onSuccess onError
+
+      let perform
+        (
+          fn: Func<'Arg, 'Return>,
+          arg: 'Arg,
+          ofSuccess: Func<'Return, 'Message>
+        ) =
+        let fn = FuncConvert.FromFunc fn
+        let onSuccess = FuncConvert.FromFunc ofSuccess
+        Cmd.OfFunc.perform fn arg onSuccess
+
+      let attempt (fn: Action<'Arg>, arg: 'Arg, ofError: Func<exn, 'Message>) =
+        let fn = FuncConvert.FromAction fn
+        let onError = FuncConvert.FromFunc ofError
+        Cmd.OfFunc.attempt fn arg onError
+
+    module OfTask =
+      open System.Threading.Tasks
+
+      let either
+        (
+          fn: Func<'Arg, Task<'Return>>,
+          arg: 'Arg,
+          ofSuccess: Func<'Return, 'Message>,
+          ofError: Func<exn, 'Message>
+        ) =
+        let fn = FuncConvert.FromFunc fn
+        let onSuccess = FuncConvert.FromFunc ofSuccess
+        let onError = FuncConvert.FromFunc ofError
+        Cmd.OfTask.either fn arg onSuccess onError
+
+      let perform
+        (
+          fn: Func<'Arg, Task<'Return>>,
+          arg: 'Arg,
+          ofSuccess: Func<'Return, 'Message>
+        ) =
+        let fn = FuncConvert.FromFunc fn
+        let onSuccess = FuncConvert.FromFunc ofSuccess
+        Cmd.OfTask.perform fn arg onSuccess
+
+      let attempt
+        (
+          fn: Func<'Arg, #Task>,
+          arg: 'Arg,
+          ofError: Func<exn, 'Message>
+        ) =
+        let fn = FuncConvert.FromFunc fn
+        let onError = FuncConvert.FromFunc ofError
+        Cmd.OfTask.attempt fn arg onError
+
 module internal AvaloniaElmish =
 
   open Avalonia.Threading
@@ -90,7 +159,3 @@ type AvaloniaElmish =
     let dispatch map = state.Dispatch map
 
     _model :> IObservable<'Model>, dispatch
-
-
-module Cmd =
-  let Empty<'a> = Cmd.Empty
