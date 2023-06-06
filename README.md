@@ -1,3 +1,8 @@
+[Avalonia.FuncUI](https://github.com/fsprojects/Avalonia.FuncUI)
+[NXUI](https://github.com/wieslawsoltes/NXUI)
+[Fabulous.Avalonia](https://github.com/fabulous-dev/Fabulous.Avalonia)
+[Elmish.Avalonia](https://github.com/JordanMarr/Elmish.Avalonia)
+
 ## Avalonia.MVU
 
 Avalonia.MVU is a Model-View-Update (MVU) library for Avalonia.
@@ -10,6 +15,7 @@ Frankly speaking, there are already some MVU libraries for Avalonia and they are
 
 - [Avalonia.FuncUI] - A true MVU plus react-like library for Avalonia. If you have a hint of react/elm then this is for you.
 - [Fabulous.Avalonia] - Fabulous supports a wide range of backends not just Avalonia but they are MVU first.
+- [Elmish.Avalonia] - Elmish Avalonia is a port of Elmish.WPF for Avalonia, you can use XAML to define your views and use MVU for the rest. It also supports Design View in VS2022 or Rider.
 
 ## Call For Help!
 
