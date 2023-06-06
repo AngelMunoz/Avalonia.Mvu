@@ -1,0 +1,36 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch F#",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build:fsharp",
+      // If you have changed target frameworks, make sure to update the program path.
+      "program": "${workspaceFolder}/src/samples/FSharp/bin/Debug/net7.0/FSharp.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/samples/FSharp",
+      // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+      "console": "internalConsole",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Launch C#",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build:csharp",
+      // If you have changed target frameworks, make sure to update the program path.
+      "program": "${workspaceFolder}/src/samples/CSharp/bin/Debug/net7.0/CSharp.dll",
+      "args": [],
+      "cwd": "${workspaceFolder}/src/samples/CSharp",
+      // For more information about the 'console' field, see https://aka.ms/VSCode-CS-LaunchJson-Console
+      "console": "internalConsole",
+      "stopAtEntry": false
+    },
+    {
+      "name": ".NET Core Attach",
+      "type": "coreclr",
+      "request": "attach"
+    }
+  ]
+}
