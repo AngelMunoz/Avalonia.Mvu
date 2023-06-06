@@ -8,7 +8,7 @@ open NXUI.Extensions
 open NXUI.FSharp.Extensions
 
 open Elmish
-open type Mvu.AvaloniaElmish
+open Avalonia.Mvu
 
 open FSharp.Control.Reactive
 
@@ -97,7 +97,9 @@ let panelContent (window: Window) : StackPanel =
 
 let view () : Window =
   let window = Window().title("NXUI and F#").width(300).height(300)
-
+#if DEBUG
+  window.AttachDevTools()
+#endif
   window.content(panelContent window)
 
 [<EntryPoint>]
