@@ -174,6 +174,11 @@ module CSharp =
     let content =
       ContentControl(
         ContentTemplate =
+          // currently we're just re-rendering the whole thing
+          // which brings problems with focus, textbox view state and similar
+          // ideally if we could replace this FuncDataTemplate with a DataTemplate
+          // that supports recycling to avoid re-rendering the whole thing
+          // it would be ideal, though I don't personally know how to make that possible
           FuncDataTemplate<'Model>(fun model _ -> view.Invoke(model, dispatch))
       )
 
@@ -236,6 +241,11 @@ let useElmishView
   let content =
     ContentControl(
       ContentTemplate =
+        // currently we're just re-rendering the whole thing
+        // which brings problems with focus, textbox view state and similar
+        // ideally if we could replace this FuncDataTemplate with a DataTemplate
+        // that supports recycling to avoid re-rendering the whole thing
+        // it would be ideal, though I don't personally know how to make that possible
         FuncDataTemplate<'Model>(fun model _ -> view model dispatch)
     )
 
