@@ -2,6 +2,7 @@
 using static Avalonia.Mvu.AvaloniaElmish;
 using static Avalonia.Mvu.CSharp;
 
+
 StackPanel PanelContent(Window window)
 {
   var (counter, dispatch) =
@@ -79,7 +80,13 @@ StackPanel PanelContent(Window window)
       CheckBox()
         .IsChecked(nameFound.ToBinding(), BindingMode.OneWay)
         .IsEnabled(false)
-        .Content("Name Found")
+        .Content("Name Found"),
+      StackPanel()
+        .Margin(new Thickness(10))
+        .Children(
+          Label().Content("Elmish Counter"),
+          ElmishCounter.Build()
+        )
     );
 }
 
@@ -112,4 +119,45 @@ public abstract record Message
   public sealed record NameFound(bool Found) : Message;
 
   public sealed record SetName(string Name) : Message;
+}
+
+public static class ElmishCounter
+{
+  public record ElmishModel(int Count = 0);
+
+  public abstract record ElmishMessage
+  {
+    public sealed record Increment : ElmishMessage;
+    public sealed record Decrement : ElmishMessage;
+  }
+
+
+  public static Control Build() =>
+    UseElmishView<ElmishModel, ElmishMessage>(
+      new ElmishModel(Count: 10),
+      (message, model) =>
+        message switch
+          {
+            ElmishMessage.Increment =>
+              (model with { Count = model.Count + 1 }, Cmd.none<ElmishMessage>()),
+            ElmishMessage.Decrement =>
+              (model with { Count = model.Count - 1 }, Cmd.none<ElmishMessage>()),
+            _ => (model, Cmd.none<ElmishMessage>()),
+          },
+      (model, dispatch) =>
+        StackPanel()
+        .Spacing(4.0)
+        .Children(
+          Button()
+            .Content("Increment")
+            .OnClick((_, o) =>
+              o.Subscribe(_ => dispatch(new ElmishMessage.Increment()))),
+          TextBlock().Text($"You clicked {model.Count} times"),
+          Button()
+            .Content("Decrement")
+            .OnClick((_, o) =>
+              o.Subscribe(_ => dispatch(new ElmishMessage.Decrement())))
+        )
+    );
+
 }

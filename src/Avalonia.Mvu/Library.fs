@@ -3,6 +3,10 @@
 open System
 open Elmish
 open System.Reactive.Subjects
+open Avalonia
+open Avalonia.Controls
+open Avalonia.Controls.Templates
+open Avalonia.Data
 
 module CSharp =
 
@@ -159,3 +163,48 @@ type AvaloniaElmish =
     let dispatch map = state.Dispatch map
 
     _model :> IObservable<'Model>, dispatch
+
+  static member UseElmishView
+    (
+      model: 'Model,
+      update: Func<'Msg, 'Model, struct ('Model * Cmd<'Msg>)>,
+      view: Func<'Model, Action<'Msg>, Control>
+    ) =
+
+    let struct (model, dispatch) = AvaloniaElmish.UseElmish(model, update)
+
+    let content = ContentControl(
+      ContentTemplate = FuncDataTemplate<'Model>(fun model _ -> view.Invoke(model, dispatch))
+    )
+
+    let descriptor =
+      ContentControl.ContentProperty
+        .Bind()
+        .WithMode(BindingMode.OneWay)
+
+    content[descriptor] <- model.ToBinding()
+    content
+
+  [<CompiledName "UseElmishView">]
+
+  static member useElmishView
+    (
+      model: 'Model,
+      update: 'Msg -> 'Model -> 'Model * Cmd<'Msg>,
+      view: 'Model -> ('Msg -> unit) -> Control
+    ) =
+    let model, dispatch = AvaloniaElmish.useElmish(model, update)
+
+    let content = ContentControl(
+      ContentTemplate = FuncDataTemplate<'Model>(fun model _ -> view model dispatch)
+    )
+
+    let descriptor =
+      ContentControl
+        .ContentProperty
+        .Bind()
+        .WithMode(BindingMode.OneWay)
+
+    content[descriptor] <- model.ToBinding()
+
+    content
