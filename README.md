@@ -1,7 +1,7 @@
-[Avalonia.FuncUI](https://github.com/fsprojects/Avalonia.FuncUI)
-[NXUI](https://github.com/wieslawsoltes/NXUI)
-[Fabulous.Avalonia](https://github.com/fabulous-dev/Fabulous.Avalonia)
-[Elmish.Avalonia](https://github.com/JordanMarr/Elmish.Avalonia)
+[Avalonia.FuncUI]: https://github.com/fsprojects/Avalonia.FuncUI
+[NXUI]: https://github.com/wieslawsoltes/NXUI
+[Fabulous.Avalonia]: https://github.com/fabulous-dev/Fabulous.Avalonia
+[Elmish.Avalonia]: https://github.com/JordanMarr/Elmish.Avalonia
 
 ## Avalonia.MVU
 
